@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libmysqlclient-dev \
       libsqlite3-0 \
       libfreetype6 \
+      libfreetype6-dev \
+      libjpeg62-turbo \
       libjpeg62-turbo-dev \
       libxml2 \
     && apt-get clean \
@@ -44,10 +46,10 @@ ENV PHP_INI_DIR /etc/php5/apache2
 RUN mkdir -p $PHP_INI_DIR/conf.d
 
 # compile openssl, otherwise --with-openssl won't work
-RUN CFLAGS="-fPIC" && OPENSSL_VERSION="1.0.2u" \
+COPY openssl-1.0.2u.tar.gz /tmp/openssl.tar.gz
+RUN CFLAGS="-fPIC" \
       && cd /tmp \
       && mkdir openssl \
-      && curl -sL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
       && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
       && cd /tmp/openssl \
       && ./config -fPIC && make && make install \
@@ -74,8 +76,6 @@ RUN buildDeps=" \
       && set -x \
       && apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
       && curl -SL "http://php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz \
-      && curl -SL "http://php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror" -o php.tar.xz.asc \
-      && gpg --verify php.tar.xz.asc \
       && mkdir -p /usr/src/php \
       && mkdir /usr/include/freetype2/freetype \
       && ln -s /usr/include/freetype2/freetype.h /usr/include/freetype2/freetype/freetype.h \
